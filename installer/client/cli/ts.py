@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 from pydub import AudioSegment
 from openai import OpenAI
+from openai.lib.azure import AzureOpenAI
 import os
 import argparse
 
@@ -11,8 +12,15 @@ class Whisper:
         load_dotenv(env_file)
         try:
             apikey = os.environ["OPENAI_API_KEY"]
-            self.client = OpenAI()
-            self.client.api_key = apikey
+            if os.environ["OPENAI_API_TYPE"] == "azure":
+                self.client = AzureOpenAI(
+                    api_version=os.environ["OPENAI_API_VERSION"],
+                    azure_endpoint=os.environ["OPENAI_ENDPOINT"],
+                    api_key=apikey,
+                )
+            else:
+                self.client = OpenAI()
+                self.client.api_key = apikey
         except KeyError:
             print("OPENAI_API_KEY not found in environment variables.")
 
